@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贪吃蛇小游戏</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; background: #f0f0f0; }
+        h1 { margin-top: 30px; }
+        #user-info { margin-top: 10px; font-size: 18px; color: #333; }
+        #score { font-size: 20px; margin-top: 10px; }
+        #controls { margin-top: 10px; }
+        #controls button { margin-right: 8px; padding: 6px 18px; font-size: 16px; border: none; border-radius: 4px; background: #4caf50; color: #fff; cursor: pointer; }
+        #controls button:last-child { margin-right: 0; }
+        #controls button:hover { background: #388e3c; }
+        #restart { background: #2196f3; }
+        #restart:hover { background: #1565c0; }
+        #pause { background: #ff9800; }
+        #pause:hover { background: #f57c00; }
+        #resume { background: #9c27b0; }
+        #resume:hover { background: #6d1b7b; }
+        #leaderboard { margin-top: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 16px 24px; min-width: 260px; }
+        #leaderboard h3 { margin: 0 0 10px 0; font-size: 18px; }
+        #leaderboard ul { list-style: none; padding: 0; margin: 0; }
+        #leaderboard li { font-size: 16px; margin-bottom: 4px; }
+        #login-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(240,240,240,0.98); z-index: 10; }
+        #login-panel input { padding: 8px; font-size: 16px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc; }
+        #login-panel button { padding: 8px 24px; font-size: 16px; border: none; border-radius: 4px; background: #2196f3; color: #fff; cursor: pointer; }
+        #login-panel button:hover { background: #1565c0; }
+        canvas { background: #222; margin-top: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div id="login-panel">
+        <h2>登录贪吃蛇</h2>
+        <input type="text" id="username" placeholder="请输入用户名" />
+        <button id="login-btn">登录</button>
+    </div>
+    <h1 style="display:none;">贪吃蛇小游戏</h1>
+    <div id="user-info" style="display:none;"></div>
+    <div id="score" style="display:none;">分数：0</div>
+    <div id="controls" style="display:none;">
+        <button id="pause">暂停</button>
+        <button id="resume" style="display:none;">继续</button>
+        <button id="restart">重新开始</button>
+        <button id="logout">退出</button>
+    </div>
+    <canvas id="game" width="400" height="400" style="display:none;"></canvas>
+    <div id="leaderboard" style="display:none;">
+        <h3>记分榜</h3>
+        <ul id="leaderboard-list"></ul>
+    </div>
+    <script src="snake.js"></script>
+    <script>
+        // 登录逻辑
+        document.getElementById('login-btn').onclick = function() {
+            var username = document.getElementById('username').value.trim();
+            if (!username) {
+                alert('请输入用户名');
+                return;
+            }
+            localStorage.setItem('snake_username', username);
+            document.getElementById('login-panel').style.display = 'none';
+            document.querySelector('h1').style.display = '';
+            document.getElementById('user-info').style.display = '';
+            document.getElementById('score').style.display = '';
+            document.getElementById('controls').style.display = '';
+            document.getElementById('game').style.display = '';
+            document.getElementById('leaderboard').style.display = '';
+            document.getElementById('user-info').innerText = '当前用户：' + username;
+            updateLeaderboard();
+        };
+        document.getElementById('username').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('login-btn').click();
+        });
+        // 记分榜逻辑
+        function updateLeaderboard() {
+            let leaderboard = JSON.parse(localStorage.getItem('snake_leaderboard') || '[]');
+            leaderboard.sort((a, b) => b.score - a.score);
+            let html = '';
+            for (let i = 0; i < Math.min(5, leaderboard.length); i++) {
+                html += `<li>${leaderboard[i].username}：${leaderboard[i].score}</li>`;
+            }
+            document.getElementById('leaderboard-list').innerHTML = html || '<li>暂无记录</li>';
+        }
+        // 页面加载时自动填充用户名和记分榜
+        window.onload = function() {
+            let username = localStorage.getItem('snake_username');
+            if (username) {
+                document.getElementById('username').value = username;
+            }
+            updateLeaderboard();
+        };
+    </script>
+</body>
+</html> 
